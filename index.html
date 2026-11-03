@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171C22">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Code en poche">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Code en poche</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Concept : bande d'asphalte avec ligne axiale jaune, losange de priorité comme repère, carte d'examen en asphalte, reste sur fond de papier-signalisation. */
+:root{
+ --bg:#E8ECF0;--surface:#FFFFFF;--ink:#0E1A2B;--muted:#586577;--line:#CBD3DC;
+ --accent:#0B52C4;--accent-ink:#FFFFFF;--accent-soft:#DCE8FB;
+ --mark:#F2BE00;--asphalt:#171C22;--asphalt-ink:#F1F4F7;--panel:#DDE3EA;
+ --good:#1B7F47;--good-soft:#DDF1E5;--on-good:#FFFFFF;
+ --bad:#B3261E;--bad-soft:#FBE3E0;--on-bad:#FFFFFF;
+ --good-dk:#58D08D;--bad-dk:#FF8D84;
+ --f-display:"Barlow Condensed","Arial Narrow",sans-serif;--f-body:"Barlow",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --bg:#0D1116;--surface:#161C23;--ink:#E7ECF1;--muted:#97A3B1;--line:#27313B;
+ --accent:#6AA3FF;--accent-ink:#0A1220;--accent-soft:#16294A;
+ --mark:#FFD23F;--asphalt:#090C0F;--panel:#222B35;
+ --good:#4FC585;--good-soft:#12301F;--on-good:#06210F;
+ --bad:#FF8279;--bad-soft:#3A1A18;--on-bad:#1A0907;color-scheme:dark}}
+:root[data-theme="dark"]{
+ --bg:#0D1116;--surface:#161C23;--ink:#E7ECF1;--muted:#97A3B1;--line:#27313B;
+ --accent:#6AA3FF;--accent-ink:#0A1220;--accent-soft:#16294A;
+ --mark:#FFD23F;--asphalt:#090C0F;--panel:#222B35;
+ --good:#4FC585;--good-soft:#12301F;--on-good:#06210F;
+ --bad:#FF8279;--bad-soft:#3A1A18;--on-bad:#1A0907;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header.top{background:var(--asphalt);color:var(--asphalt-ink)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:700;font-size:24px;letter-spacing:.07em;text-transform:uppercase}
+.chip{font-family:var(--f-display);font-size:14px;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border:1px solid rgba(255,255,255,.3);border-radius:4px;white-space:nowrap}
+.dash{height:4px;background:repeating-linear-gradient(90deg,var(--mark) 0 28px,transparent 28px 48px)}
+main{padding-block:22px 48px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(34px,8vw,48px);line-height:1;margin:0 0 8px;text-wrap:balance}
+h2{margin:0}
+.sub{color:var(--muted);margin:0 0 18px;max-width:58ch}
+.eyebrow{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.1em;font-size:15px;font-weight:600;color:var(--muted);margin:30px 0 10px}
+.lvl{display:grid;gap:6px;margin-bottom:20px}
+.lvl .r{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.lvl b{font-family:var(--f-display);font-size:20px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+.track{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.fill{height:100%;background:var(--accent);width:0}
+.exam{background:var(--asphalt);color:var(--asphalt-ink);border-radius:10px;padding:20px;display:grid;gap:16px}
+.exam h2{font-family:var(--f-display);font-size:30px;text-transform:uppercase;letter-spacing:.04em}
+.exam p{margin:4px 0 0;opacity:.8;max-width:52ch}
+.facts{display:flex;gap:22px;flex-wrap:wrap}
+.facts div{display:flex;flex-direction:column;font-size:13px;text-transform:uppercase;letter-spacing:.06em;opacity:.95}
+.facts b{font-family:var(--f-display);font-size:44px;line-height:1;color:var(--mark);letter-spacing:0;font-variant-numeric:tabular-nums}
+.btn{font-family:var(--f-display);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:18px;padding:11px 20px;border-radius:8px;border:2px solid transparent;cursor:pointer;min-height:48px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.mark{background:var(--mark);color:#14181D;justify-self:start}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.link{background:none;border:0;color:var(--accent);font-weight:600;font-size:15px;padding:8px 0;cursor:pointer}
+.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.theme{text-align:left;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer;display:grid;gap:6px;min-width:0}
+.theme .n{font-weight:600;line-height:1.25}
+.theme .m{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
+.tag{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.06em;font-size:13px;font-weight:600;color:var(--bad)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.hist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.hist li{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.hist .d{color:var(--muted);font-size:14px;flex:1}
+.hist .s{font-family:var(--f-display);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.pill{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.06em;font-size:14px;font-weight:700;padding:2px 10px;border-radius:4px}
+.pill.ok{background:var(--good-soft);color:var(--good)}
+.pill.ko{background:var(--bad-soft);color:var(--bad)}
+.empty{color:var(--muted);margin:0}
+.qtop{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.mode{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.08em;font-size:15px;color:var(--muted)}
+.num{font-family:var(--f-display);font-size:18px;letter-spacing:.04em;text-transform:uppercase}
+.num b{font-size:26px;font-variant-numeric:tabular-nums}
+.quit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;font-size:15px}
+.segs{display:flex;gap:2px;margin-bottom:14px}
+.seg{flex:1;height:6px;border-radius:2px;background:var(--line)}
+.seg.cur{background:var(--accent)}.seg.done{background:var(--ink)}.seg.good{background:var(--good)}.seg.bad{background:var(--bad)}
+.timer{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.timer .t{font-family:var(--f-display);font-weight:700;font-size:34px;min-width:2ch;text-align:right;font-variant-numeric:tabular-nums}
+.timer .tb{flex:1;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.timer .tf{height:100%;background:var(--accent);transform-origin:left;transform:scaleX(1)}
+.timer.low .tf{background:var(--bad)}.timer.low .t{color:var(--bad)}
+.sp{display:grid;place-items:center;background:var(--panel);border-radius:8px;padding:16px;margin-bottom:14px}
+svg.sign{width:120px;height:120px;max-width:100%}
+.q{font-size:clamp(18px,4.6vw,21px);font-weight:600;line-height:1.35;margin:0 0 4px;text-wrap:pretty}
+.hint{font-size:13px;color:var(--muted);margin:0 0 14px;text-transform:uppercase;letter-spacing:.06em}
+.opts{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.opt{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;width:100%;text-align:left;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:11px 12px;font-size:16px;cursor:pointer;min-height:56px}
+.opt .l{font-family:var(--f-display);font-weight:700;font-size:20px;display:grid;place-items:center;width:34px;height:34px;border-radius:6px;background:var(--bg);border:1.5px solid var(--line)}
+.opt .t{padding-top:5px}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.sel .l{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt.ok{border-color:var(--good);background:var(--good-soft)}
+.opt.ok .l{background:var(--good);color:var(--on-good);border-color:var(--good)}
+.opt.ko{border-color:var(--bad);background:var(--bad-soft)}
+.opt.ko .l{background:var(--bad);color:var(--on-bad);border-color:var(--bad)}
+.opt.miss{border:1.5px dashed var(--good)}
+.opt.miss .l{border-color:var(--good);color:var(--good)}
+.opt:disabled{cursor:default}
+.opt em{font-style:normal;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--good);margin-left:8px}
+.fb{margin-top:14px;padding:14px;border-radius:8px;border-left:5px solid}
+.fb.ok{background:var(--good-soft);border-color:var(--good)}.fb.ko{background:var(--bad-soft);border-color:var(--bad)}
+.fb h3{margin:0 0 4px;font-family:var(--f-display);text-transform:uppercase;letter-spacing:.06em;font-size:20px}
+.fb p{margin:0}
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.kbd{display:none;font-size:13px;color:var(--muted);margin-top:10px}
+@media (hover:hover){.kbd{display:block}}
+.verdict{background:var(--asphalt);color:var(--asphalt-ink);border-radius:10px;padding:22px;display:grid;gap:6px}
+.score{font-family:var(--f-display);font-weight:700;font-size:clamp(72px,22vw,112px);line-height:.9;color:var(--mark);font-variant-numeric:tabular-nums}
+.score small{font-size:.4em;color:var(--asphalt-ink);opacity:.7}
+.vt{font-family:var(--f-display);font-weight:700;font-size:30px;text-transform:uppercase;letter-spacing:.06em}
+.vt.ok{color:var(--good-dk)}.vt.ko{color:var(--bad-dk)}
+.verdict p{margin:0;opacity:.85}
+.br{display:grid;gap:8px}
+.br .b{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;font-size:15px}
+.br .b span:last-child{font-family:var(--f-display);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.br .track{grid-column:1/-1}
+.tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tab{background:transparent;border:1.5px solid var(--line);color:var(--ink);border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.cl{display:grid;gap:12px}
+.ci{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:8px;min-width:0}
+.ci.good{border-left-color:var(--good)}.ci.bad{border-left-color:var(--bad)}
+.ci .h{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.ci .h b{font-family:var(--f-display);font-size:20px;color:var(--ink)}
+.ci svg.sign{width:72px;height:72px}
+.ci .cq{margin:0;font-weight:600}
+.ci ul{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:15px}
+.ci li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:6px}
+.ci li.ok .mk,.ci li.miss .mk{color:var(--good);font-weight:700}
+.ci li.ko .mk{color:var(--bad);font-weight:700}
+.ci em{font-style:normal;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-left:6px}
+.ci .ex{margin:0;font-size:14px;color:var(--muted)}
+.foot{margin-top:28px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<header class="top">
+ <div class="wrap bar">
+  <div class="brand"><svg width="22" height="22" viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,3 97,50 50,97 3,50" fill="#fff"/><polygon points="50,14 86,50 50,86 14,50" fill="#F5C400" stroke="#14181D" stroke-width="3"/></svg><span>Code en poche</span></div>
+  <span class="chip" id="chipLevel">Élève</span>
+ </div>
+ <div class="dash" aria-hidden="true"></div>
+</header>
+
+<main class="wrap">
+ <section id="home">
+  <h1>Prêt pour l’examen ?</h1>
+  <p class="sub">Le code de la route français en questions à choix multiples. Passe un examen blanc ou travaille un thème à la fois.</p>
+  <div class="lvl"><div class="r"><b id="lvName">Élève</b><span id="lvInfo"></span></div><div class="track"><div class="fill" id="lvFill"></div></div></div>
+  <div class="exam">
+   <div><h2>Examen blanc</h2><p>Mêmes conditions que le jour J : pas de retour en arrière, correction à la fin.</p></div>
+   <div class="facts"><div><b>40</b>questions</div><div><b>30 s</b>par question</div><div><b>35</b>pour être admis</div></div>
+   <button class="btn mark" id="btnExam" type="button">Lancer l’examen</button>
+  </div>
+  <h2 class="eyebrow">S’entraîner par thème</h2>
+  <div class="themes" id="themes"></div>
+  <h2 class="eyebrow">Mes erreurs</h2>
+  <div class="card row"><div><b id="errCount">0 question</b><div class="empty" id="errSub"></div></div><button class="btn primary" id="btnErr" type="button">Réviser</button></div>
+  <h2 class="eyebrow">Derniers examens</h2>
+  <ul class="hist" id="hist"></ul>
+  <div class="foot"><button class="link" id="reset" type="button">Réinitialiser ma progression</button></div>
+ </section>
+
+ <section id="quiz" hidden>
+  <div class="qtop"><button class="link" id="btnQuit" type="button">Quitter</button><span class="mode" id="qMode"></span><span class="num" id="qNum"></span></div>
+  <div class="quit" id="quitAsk" hidden><span id="quitMsg">Abandonner l’examen en cours ?</span><button class="btn ghost" id="quitYes" type="button">Confirmer</button><button class="btn primary" id="quitNo" type="button">Continuer</button></div>
+  <div class="segs" id="segs"></div>
+  <div class="timer" id="timer" hidden><span class="t" id="tSec">30</span><div class="tb"><div class="tf" id="tBar"></div></div></div>
+  <div class="card">
+   <div class="sp" id="signBox" hidden></div>
+   <h2 class="q" id="qText"></h2>
+   <p class="hint">Une ou plusieurs réponses justes</p>
+   <ul class="opts" id="opts"></ul>
+   <div class="fb" id="fb" hidden></div>
+   <div class="actions"><button class="btn primary" id="btnVal" type="button" disabled>Valider</button><button class="btn primary" id="btnNext" type="button" hidden>Question suivante</button></div>
+   <div class="kbd">Clavier : touches 1 à 4 pour choisir, Entrée pour valider.</div>
+  </div>
+  <div class="actions"><button class="btn ghost" id="btnRestart" type="button">Recommencer</button><button class="btn ghost" id="btnAbandon" type="button">Abandonner</button></div>
+ </section>
+
+ <section id="result" hidden>
+  <div class="verdict" id="verdict"></div>
+  <div id="breakdown"></div>
+  <div class="actions"><button class="btn primary" id="btnAgain" type="button">Rejouer</button><button class="btn ghost" id="btnHome" type="button">Accueil</button></div>
+  <h2 class="eyebrow">Correction</h2>
+  <div class="tabs"><button class="tab" id="tabBad" type="button" aria-pressed="true">Mes erreurs</button><button class="tab" id="tabAll" type="button" aria-pressed="false">Tout voir</button></div>
+  <div class="cl" id="corr"></div>
+ </section>
+</main>
+
+<script>
+const RED="#D5202D",BLUE="#0B4EA2",YEL="#F5C400",BLK="#14181D";
+const svg=i=>`<svg class="sign" viewBox="0 0 100 100" role="img" aria-label="Panneau de signalisation">${i}</svg>`;
+const tri=i=>`<polygon points="50,6 96,88 4,88" fill="${RED}" stroke="${RED}" stroke-width="4" stroke-linejoin="round"/><polygon points="50,22 82,80 18,80" fill="#fff"/>${i}`;
+const ring=(c,i)=>`<circle cx="50" cy="50" r="46" fill="${c}"/>${i}`;
+const carS=(x,c)=>`<g transform="translate(${x} 0)"><g fill="${c}"><rect x="0" y="48" width="26" height="14" rx="3"/><path d="M4 48 L8 37 H18 L22 48 Z"/></g><path d="M9 47 L11 40 H15 L17 47 Z" fill="#fff"/><rect x="3" y="61" width="6" height="5" rx="1" fill="${BLK}"/><rect x="17" y="61" width="6" height="5" rx="1" fill="${BLK}"/></g>`;
+const txt=(t,x,y,s,c)=>`<text x="${x}" y="${y}" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="${s}" fill="${c}">${t}</text>`;
+const SIGNS={
+stop:svg(`<polygon points="30,3 70,3 97,30 97,70 70,97 30,97 3,70 3,30" fill="#fff"/><polygon points="31,8 69,8 92,31 92,69 69,92 31,92 8,69 8,31" fill="${RED}"/>${txt("STOP",50,60,32,"#fff")}`),
+cedez:svg(`<polygon points="4,10 96,10 50,92" fill="${RED}" stroke="${RED}" stroke-width="5" stroke-linejoin="round"/><polygon points="22,21 78,21 50,70" fill="#fff" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>`),
+sens:svg(ring(RED,`<rect x="18" y="41" width="64" height="18" fill="#fff"/>`)),
+v50:svg(ring(RED,`<circle cx="50" cy="50" r="33" fill="#fff"/>${txt("50",50,63,40,BLK)}`)),
+zone30:svg(`<rect x="5" y="5" width="90" height="90" rx="6" fill="#fff" stroke="${BLUE}" stroke-width="6"/>${txt("ZONE",50,26,18,BLK)}<circle cx="50" cy="63" r="26" fill="#fff" stroke="${RED}" stroke-width="6"/>${txt("30",50,73,30,BLK)}`),
+prio:svg(`<polygon points="50,3 97,50 50,97 3,50" fill="#fff" stroke="${BLK}" stroke-width="2"/><polygon points="50,14 86,50 50,86 14,50" fill="${YEL}" stroke="${BLK}" stroke-width="2"/>`),
+stat:svg(ring(RED,`<circle cx="50" cy="50" r="38" fill="${BLUE}"/><line x1="25" y1="25" x2="75" y2="75" stroke="${RED}" stroke-width="10"/>`)),
+arret:svg(ring(RED,`<circle cx="50" cy="50" r="38" fill="${BLUE}"/><line x1="25" y1="25" x2="75" y2="75" stroke="${RED}" stroke-width="10"/><line x1="75" y1="25" x2="25" y2="75" stroke="${RED}" stroke-width="10"/>`)),
+droite:svg(ring(BLUE,`<polygon points="22,44 56,44 56,30 80,50 56,70 56,56 22,56" fill="#fff"/>`)),
+dep:svg(ring(RED,`<circle cx="50" cy="50" r="38" fill="#fff"/>${carS(20,RED)}${carS(54,BLK)}`)),
+feux:svg(tri(`<rect x="43" y="38" width="14" height="38" rx="3" fill="${BLK}"/><circle cx="50" cy="46" r="4" fill="#E02020"/><circle cx="50" cy="57" r="4" fill="#F28C00"/><circle cx="50" cy="68" r="4" fill="#1FA84F"/>`)),
+unique:svg(`<rect x="6" y="6" width="88" height="88" rx="6" fill="${BLUE}"/><polygon points="42,80 42,48 30,48 50,22 70,48 58,48 58,80" fill="#fff"/>`),
+danger:svg(tri(`<rect x="47" y="40" width="6" height="22" rx="2" fill="${BLK}"/><circle cx="50" cy="70" r="4" fill="${BLK}"/>`))
+};
+const THEMES=[["sign","Panneaux"],["prio","Priorités et intersections"],["vit","Vitesse et distances"],["cond","Alcool, fatigue et téléphone"],["stat","Arrêt et stationnement"],["dep","Dépassement et croisement"],["lum","Éclairage et visibilité"],["secu","Sécurité des passagers"],["meca","Véhicule et entretien"],["accid","Accidents et secours"],["env","Permis, assurance et éco-conduite"]];
+const Q=(t,q,o,a,e,s)=>({t,q,o,a,e,s});
+const QS=[
+/* Panneaux */
+Q("sign","Que devez-vous faire en arrivant à ce panneau ?",["Ralentir, puis passer si la route est libre","Vous arrêter complètement à la limite de la chaussée ou à la ligne d’arrêt","Céder le passage uniquement aux véhicules venant de droite","Céder le passage à tous les véhicules de la route que vous abordez"],[1,3],"Le STOP impose un arrêt complet, même si la route semble libre. Ensuite, vous laissez passer tous les véhicules de la route abordée, quel que soit leur côté d’arrivée.","stop"),
+Q("sign","Ce panneau vous oblige à…",["Vous arrêter systématiquement","Céder le passage aux véhicules de la route que vous abordez","Vous considérer comme prioritaire","Ralentir et vous arrêter si nécessaire"],[1,3],"Le « cédez le passage » n’impose pas l’arrêt : vous ralentissez et vous vous arrêtez seulement si un véhicule prioritaire arrive.","cedez"),
+Q("sign","Ce panneau signifie…",["Sens interdit","Interdiction de stationner","Voie réservée aux véhicules prioritaires","Interdiction de tourner"],[0],"Sens interdit : vous ne pouvez pas entrer dans cette voie dans ce sens. Un panneau complémentaire peut y autoriser certains usagers, par exemple les cycles.","sens"),
+Q("sign","Ce panneau signifie…",["Vitesse maximale autorisée : 50 km/h","Vitesse minimale imposée : 50 km/h","Vitesse conseillée : 50 km/h","Fin de limitation de vitesse à 50 km/h"],[0],"Un panneau rond à bord rouge exprime une interdiction. Ici, il est interdit de dépasser 50 km/h.","v50"),
+Q("sign","Vous entrez dans une zone 30. Quelles règles s’appliquent ?",["La vitesse est limitée à 30 km/h pour tous les véhicules","La priorité à droite s’applique, sauf signalisation contraire","Les rues à sens unique sont en principe à double sens pour les cyclistes","La circulation y est interdite aux cycles"],[0,1,2],"En zone 30, la vitesse maximale est de 30 km/h, la priorité à droite reste la règle sans signalisation, et les cyclistes peuvent en principe circuler à double sens dans les rues à sens unique.","zone30"),
+Q("sign","Ce panneau indique que…",["Vous avez la priorité aux intersections suivantes, tant qu’il n’est pas barré","Vous devez céder le passage à la prochaine intersection","Vous devez ralentir à l’intersection suivante","La priorité à droite s’applique à la prochaine intersection"],[0],"Le losange jaune signale une route à caractère prioritaire. Le panneau barré indique que la priorité prend fin.","prio"),
+Q("sign","Que signifie ce panneau ?",["Stationnement interdit, l’arrêt reste possible","Arrêt et stationnement interdits","Stationnement payant","Stationnement réservé aux riverains"],[0],"Une seule barre : seul le stationnement est interdit. Vous pouvez vous arrêter le temps de déposer ou de prendre quelqu’un, conducteur au volant.","stat"),
+Q("sign","Que signifie ce panneau ?",["Arrêt et stationnement interdits","Stationnement interdit seulement","Interdiction de tourner","Sens interdit"],[0],"La croix signifie que l’arrêt comme le stationnement sont interdits, du côté de la chaussée où le panneau est placé.","arret"),
+Q("sign","Que signifie ce panneau rond bleu ?",["Direction obligatoire à droite","Interdiction de tourner à droite","Priorité à droite","Route à sens unique vers la droite"],[0],"Rond à fond bleu : obligation. Vous devez tourner à droite.","droite"),
+Q("sign","Ce panneau interdit de…",["Dépasser les véhicules à moteur autres que les deux-roues sans side-car","Se croiser","Dépasser les piétons","Circuler en double file"],[0],"L’interdiction de dépasser cesse au panneau de fin d’interdiction.","dep"),
+Q("sign","Que signale ce panneau triangulaire ?",["L’approche d’un feu tricolore","Une zone de travaux","Un feu clignotant à l’intersection","Une obligation de s’arrêter"],[0],"Un triangle à bord rouge annonce un danger : ici, un feu tricolore plus loin.","feux"),
+Q("sign","Ce panneau carré bleu indique…",["Une rue à sens unique","Un sens interdit","Une obligation d’aller tout droit","Une route réservée aux véhicules prioritaires"],[0],"Un carré ou un rectangle apporte une indication. Ici, la circulation se fait dans un seul sens.","unique"),
+Q("sign","Un panneau triangulaire à bord rouge, pointe en haut, annonce…",["Un danger","Une obligation","Une interdiction","Une simple indication"],[0],"Triangle : danger. Rond rouge : interdiction. Rond bleu : obligation. Carré ou rectangle : indication.","danger"),
+Q("sign","Un panneau rond à bord rouge indique en général…",["Une interdiction ou une limitation","Une obligation","Un danger","Un service pour les usagers"],[0],"Les obligations sont sur fond bleu, les dangers dans un triangle."),
+/* Priorités */
+Q("prio","À une intersection sans panneau ni feu, qui est prioritaire ?",["Le véhicule qui vient de ma droite","Le véhicule qui vient de ma gauche","Le véhicule le plus rapide","Le véhicule le plus imposant"],[0],"Sans signalisation, c’est la priorité à droite qui s’applique."),
+Q("prio","L’entrée d’un giratoire est marquée d’un « cédez le passage ». Que faites-vous ?",["Je cède le passage aux véhicules déjà dans l’anneau","Je passe avant ceux de l’anneau s’ils sont à ma gauche","J’entre sans ralentir si je suis seul à l’entrée","Je mets mon clignotant droit avant ma sortie"],[0,3],"Les véhicules engagés dans l’anneau sont prioritaires. On signale sa sortie en mettant le clignotant droit avant de quitter le giratoire."),
+Q("prio","Un tramway croise votre route à une intersection sans feu ni panneau. Qui passe en premier ?",["Le tramway","Moi, s’il vient de ma gauche","Le plus rapide","Celui qui arrive le premier"],[0],"Les tramways sont prioritaires aux intersections, sauf signalisation contraire. Il faut leur céder le passage."),
+Q("prio","Une ambulance arrive derrière vous, gyrophare et sirène en action. Que faites-vous ?",["Je me range et je m’arrête si nécessaire","Je continue sans changer de trajectoire","Je grille le feu rouge pour lui laisser la place","Je klaxonne pour la prévenir"],[0],"Vous devez faciliter son passage en serrant à droite et en vous arrêtant si besoin, sans commettre d’infraction."),
+Q("prio","Le feu passe à l’orange fixe alors que vous en êtes encore loin. Que faites-vous ?",["Je m’arrête","J’accélère pour passer","Je passe sans changer d’allure","Je klaxonne"],[0],"L’orange fixe impose l’arrêt, sauf si vous êtes trop près pour vous arrêter dans de bonnes conditions de sécurité."),
+Q("prio","Que signifie un feu orange clignotant ?",["Je dois m’arrêter","Je passe avec prudence en respectant les règles de priorité","La priorité à droite est supprimée","Je suis prioritaire"],[1],"Un feu orange clignotant n’est pas une priorité : les règles habituelles (priorité à droite ou panneaux) s’appliquent."),
+Q("prio","Un piéton est engagé ou veut clairement traverser au passage piéton. Que faites-vous ?",["Je lui cède le passage","Je le laisse passer seulement s’il est seul","Je klaxonne pour qu’il se dépêche","Je passe vite avant lui"],[0],"Tout conducteur doit céder le passage au piéton engagé ou qui manifeste clairement l’intention de traverser."),
+Q("prio","Vous tournez à droite ou à gauche. Des piétons traversent la route que vous allez prendre. Que devez-vous faire ?",["Leur céder le passage","Passer avant eux en roulant doucement","Passer si je suis déjà engagé","Klaxonner pour les prévenir"],[0],"Le conducteur qui tourne doit céder le passage aux piétons qui traversent la chaussée qu’il va emprunter."),
+Q("prio","Vous êtes face à un « cédez le passage ». Un véhicule vient de gauche, un autre de droite sur l’autre route. À qui cédez-vous ?",["À celui de gauche seulement","À celui de droite seulement","Aux deux","À aucun"],[2],"Le « cédez le passage » vous oblige à laisser passer tous les véhicules de la route que vous abordez."),
+/* Vitesse */
+Q("vit","En agglomération, sauf indication contraire, la vitesse maximale est de…",["30 km/h","50 km/h","60 km/h","70 km/h"],[1],"La limite générale en agglomération est de 50 km/h."),
+Q("vit","Hors agglomération, sur une route à double sens sans séparateur central, sauf signalisation contraire, la vitesse maximale par temps sec est de…",["70 km/h","80 km/h","90 km/h","100 km/h"],[1],"Sans indication, la limite est de 80 km/h sur ces routes."),
+Q("vit","Sur autoroute, par temps de pluie, la vitesse maximale est de…",["110 km/h","100 km/h","120 km/h","130 km/h"],[0],"Par temps de pluie, la limite sur autoroute passe de 130 à 110 km/h."),
+Q("vit","Quelle est la vitesse maximale en cas de brouillard avec une visibilité inférieure à 50 mètres ?",["30 km/h","50 km/h","70 km/h","80 km/h"],[1],"Quand la visibilité est inférieure à 50 mètres, la vitesse est limitée à 50 km/h sur toutes les routes."),
+Q("vit","La distance d’arrêt d’un véhicule est égale à…",["La distance de réaction plus la distance de freinage","La distance de freinage seule","La distance de réaction seule","Deux fois la distance de freinage"],[0],"Pendant le temps de réaction, le véhicule continue à rouler avant même que le freinage commence."),
+Q("vit","Quels facteurs allongent la distance d’arrêt ?",["Une chaussée mouillée","Des pneus usés","La fatigue du conducteur","Une chaussée sèche"],[0,1,2],"L’adhérence réduite augmente la distance de freinage, et la fatigue allonge le temps de réaction."),
+Q("vit","Si vous doublez votre vitesse, la distance de freinage est environ…",["Doublée","Multipliée par 4","Multipliée par 3","La même"],[1],"La distance de freinage augmente avec le carré de la vitesse."),
+Q("vit","La distance de sécurité avec le véhicule qui vous précède correspond au minimum à…",["1 seconde","2 secondes","3 secondes","5 secondes"],[1],"Il faut au moins 2 secondes d’intervalle, davantage sur chaussée mouillée."),
+Q("vit","Un conducteur en permis probatoire roule sur autoroute, temps sec. Quelle est sa vitesse maximale ?",["110 km/h","120 km/h","130 km/h","90 km/h"],[0],"En période probatoire, la limite est de 110 km/h sur autoroute, 100 sur route à chaussées séparées et 80 sur les autres routes."),
+Q("vit","Dans une zone de rencontre, la vitesse est limitée à…",["10 km/h","20 km/h","30 km/h","50 km/h"],[1],"Les piétons y sont prioritaires et peuvent circuler sur la chaussée."),
+/* Conducteur */
+Q("cond","Pour un conducteur ayant son permis depuis plus de 3 ans, le taux d’alcool maximal autorisé est de…",["0,2 g/L de sang","0,5 g/L de sang","0,8 g/L de sang","1 g/L de sang"],[1],"La limite est de 0,5 g/L de sang, soit 0,25 mg/L d’air expiré."),
+Q("cond","Pour un conducteur en permis probatoire, le taux d’alcool maximal est de…",["0,2 g/L de sang","0,5 g/L de sang","0,8 g/L de sang","0 g/L de sang"],[0],"La limite est abaissée à 0,2 g/L de sang pendant la période probatoire."),
+Q("cond","À partir de quel taux l’alcool au volant devient-il un délit ?",["0,5 g/L de sang","0,8 g/L de sang","1,2 g/L de sang","0,4 g/L de sang"],[1],"Entre 0,5 et 0,8 g/L, c’est une contravention. À partir de 0,8 g/L de sang (0,40 mg/L d’air expiré), c’est un délit."),
+Q("cond","Conduire après avoir consommé du cannabis…",["Est toléré si je me sens en forme","Est un délit, même à faible dose","Est autorisé le week-end","Peut entraîner un retrait de points et une suspension du permis"],[1,3],"L’usage de stupéfiants au volant est un délit, avec notamment un retrait de 6 points."),
+Q("cond","Un pictogramme rouge de niveau 3 sur une boîte de médicament signifie…",["Soyez prudent","Soyez très prudent, demandez conseil","Ne pas conduire, demandez l’avis d’un médecin pour reprendre","Aucun effet sur la conduite"],[2],"Le niveau 3 est le plus élevé : la conduite est déconseillée, avec l’avis d’un médecin pour la reprendre."),
+Q("cond","Sur un long trajet, quelle pause est recommandée ?",["Toutes les 2 heures, au moins 15 minutes","Toutes les 5 heures","Seulement si on est fatigué","Un café suffit"],[0],"La fatigue réduit la vigilance bien avant qu’on s’en rende compte."),
+Q("cond","Lesquelles de ces pratiques sont interdites en conduisant ?",["Téléphoner en tenant le téléphone en main","Porter des écouteurs ou un casque audio","Utiliser un kit mains libres intégré au véhicule","Écrire un SMS à un feu rouge"],[0,1,3],"Tenir un téléphone en main est interdit, même à l’arrêt à un feu. Les écouteurs et casques audio le sont aussi."),
+Q("cond","Quelles sont les conséquences de l’alcool sur la conduite ?",["Il diminue les réflexes et la vigilance","Il améliore la concentration","Il réduit le champ visuel","Un café permet de l’éliminer"],[0,2],"Seul le temps élimine l’alcool.")
+];
+QS.push(
+/* Stationnement */
+Q("stat","Dans quels cas le stationnement est-il considéré comme très gênant (135 €) ?",["Sur un passage piéton","Sur un trottoir","Sur une place réservée aux personnes handicapées, sans carte","Dans un emplacement délimité au sol"],[0,1,2],"Ces stationnements sont très gênants. Un emplacement délimité est évidemment autorisé, sauf règle contraire."),
+Q("stat","Dans quels lieux l’arrêt et le stationnement sont-ils dangereux ?",["Dans un virage sans visibilité","Au sommet d’une côte","À proximité d’un passage à niveau","Dans une rue calme et large"],[0,1,2],"La visibilité insuffisante rend l’arrêt dangereux."),
+Q("stat","Vous stationnez en zone bleue. Que devez-vous faire ?",["Afficher le disque réglé sur l’heure d’arrivée, bien visible","Payer à l’horodateur","Stationner sans limite de durée","Laisser un mot sur le pare-brise"],[0],"La durée est limitée, et le disque doit être visible derrière le pare-brise."),
+Q("stat","Hors agglomération, où doit-on stationner ?",["Sur l’accotement, à droite, quand c’est possible","Au milieu de la chaussée","Sur la ligne continue","Toujours sur la chaussée"],[0],"On s’écarte le plus possible de la chaussée pour ne pas gêner la circulation."),
+Q("stat","Le stationnement en double file est…",["Interdit, même avec les feux de détresse","Autorisé 5 minutes","Autorisé avec les feux de détresse","Autorisé la nuit"],[0],"Il gêne la circulation et peut gêner les véhicules de secours."),
+Q("stat","Stationnement alterné semi-mensuel : du 1er au 15 du mois, vous stationnez…",["Du côté des numéros impairs","Du côté des numéros pairs","Sur le côté droit de la rue","Sur le côté de votre choix"],[0],"Du 1er au 15 : côté impair. Du 16 à la fin du mois : côté pair."),
+/* Dépassement */
+Q("dep","Dans quels cas le dépassement est-il interdit ?",["À l’approche du sommet d’une côte sans visibilité","Sur une ligne continue","À une intersection où je n’ai pas la priorité","Sur une ligne discontinue en ligne droite"],[0,1,2],"Quand on ne voit pas la route libre, on ne dépasse pas."),
+Q("dep","En agglomération, la distance latérale minimale pour dépasser un cycliste est de…",["1 mètre","1,5 mètre","0,5 mètre","2 mètres"],[0],"1 mètre en agglomération, 1,5 mètre hors agglomération."),
+Q("dep","Hors agglomération, la distance latérale minimale pour dépasser un cycliste est de…",["1 mètre","1,5 mètre","0,5 mètre","2 mètres"],[1],"Il faut davantage d’espace quand la vitesse est plus élevée."),
+Q("dep","Avant de déboîter pour dépasser, vous devez…",["Contrôler les rétroviseurs et l’angle mort","Mettre votre clignotant","Accélérer sans regarder","Klaxonner pour prévenir"],[0,1],"On regarde, on signale, puis on déboîte."),
+Q("dep","Dans quels cas peut-on dépasser par la droite ?",["Quand le véhicule précédent signale qu’il tourne à gauche","Toujours sur autoroute","Quand la circulation est établie en files ininterrompues","Jamais"],[0,2],"Le dépassement se fait en principe par la gauche, avec ces exceptions."),
+Q("dep","Dans une côte trop étroite pour croiser, qui doit s’arrêter ?",["Le véhicule qui descend","Le véhicule qui monte","Le plus petit","Le plus rapide"],[0],"Il est plus facile de s’arrêter et de reculer en descente."),
+Q("dep","Sur autoroute à plusieurs voies, la voie de gauche est…",["Réservée aux dépassements","Utilisable en permanence","Réservée aux poids lourds","Réservée aux véhicules prioritaires"],[0],"On se rabat à droite dès que le dépassement est terminé."),
+/* Éclairage */
+Q("lum","Quand devez-vous passer des feux de route aux feux de croisement ?",["Quand je croise un véhicule","Quand je suis un véhicule de près","Quand la route est déserte","Quand je roule à plus de 90 km/h"],[0,1],"Il faut éviter d’éblouir les autres conducteurs."),
+Q("lum","Dans un tunnel, quels feux devez-vous utiliser ?",["Au minimum les feux de croisement","Uniquement les feux de brouillard","Uniquement les feux de position","Les feux de route"],[0],"Les feux de croisement sont obligatoires dans un tunnel."),
+Q("lum","Les feux de brouillard arrière s’utilisent…",["Quand la visibilité est inférieure à 50 mètres","Dès qu’il pleut","Toujours la nuit","Pour être vu en stationnement"],[0],"Allumés hors de ces cas, ils éblouissent les conducteurs qui suivent."),
+Q("lum","Quand peut-on utiliser les feux de détresse ?",["En cas de panne ou d’accident","Pour signaler un ralentissement brusque sur voie rapide","Pour se garer en double file","Pour remercier un conducteur"],[0,1],"Ils signalent un danger, pas une courtoisie."),
+Q("lum","Un motard doit-il rouler avec ses feux de croisement de jour ?",["Oui, l’éclairage est obligatoire en permanence","Non, seulement la nuit","Non, jamais","Seulement hors agglomération"],[0],"Les deux-roues motorisés doivent être éclairés en permanence."),
+Q("lum","Quand signaler un changement de direction ?",["Suffisamment tôt, avant la manœuvre","Au moment de tourner le volant","Après la manœuvre","Ce n’est pas nécessaire"],[0],"Les autres conducteurs doivent pouvoir réagir."),
+Q("lum","Un véhicule vous éblouit en face. Que faites-vous ?",["Je regarde vers le bord droit de la route et je ralentis","Je ferme les yeux","J’allume mes feux de route","J’accélère"],[0],"Évitez de fixer les phares et réduisez votre vitesse."),
+Q("lum","Par forte pluie en plein jour, vous devez…",["Allumer les feux de croisement","Allumer les feux de brouillard arrière","Éteindre vos feux","Utiliser les feux de route"],[0],"Quand la visibilité diminue, il faut être vu."),
+/* Sécurité */
+Q("secu","La ceinture de sécurité est obligatoire pour…",["Le conducteur seulement","Tous les occupants, à l’avant comme à l’arrière","Seulement hors agglomération","Seulement sur autoroute"],[1],"Tous les occupants doivent l’attacher, sur tous les trajets."),
+Q("secu","Un enfant de moins de 10 ans doit voyager avec…",["Un dispositif de retenue adapté à son âge et à son poids","La ceinture seule","Un adulte qui le tient sur les genoux","Rien de particulier"],[0],"Siège auto ou rehausseur selon l’âge et le poids."),
+Q("secu","Un enfant est installé à l’avant, dans un siège dos à la route. Que devez-vous faire ?",["Désactiver l’airbag passager","Laisser l’airbag activé","Reculer le siège passager au maximum","Retirer l’appui-tête"],[0],"L’airbag en se déployant frapperait le siège enfant."),
+Q("secu","Quels équipements sont obligatoires pour un conducteur de moto ?",["Un casque homologué et attaché","Des gants homologués","Une veste airbag","Des bottes montantes"],[0,1],"Le casque et les gants homologués sont obligatoires."),
+Q("secu","À vélo, le casque est obligatoire pour…",["Les enfants de moins de 12 ans, conducteurs ou passagers","Tous les cyclistes","Les cyclistes en agglomération","Aucun cycliste"],[0],"Il reste fortement recommandé pour tous les cyclistes."),
+Q("secu","L’airbag…",["Complète la ceinture de sécurité","Remplace la ceinture","Est efficace sans ceinture","Dispense de régler les appuis-tête"],[0],"Sans ceinture, l’airbag peut même être dangereux."),
+Q("secu","Pour transporter des objets lourds dans l’habitacle…",["Je les arrime ou je les mets dans le coffre","Je les laisse libres sur la plage arrière","Je les pose sur le siège passager","Je les mets devant les pieds du passager"],[0],"Lors d’un choc, un objet non fixé devient un projectile."),
+/* Véhicule */
+Q("meca","Quelle est la profondeur minimale légale des sculptures des pneus ?",["1,6 mm","3 mm","1 mm","2,5 mm"],[0],"En dessous de 1,6 mm, le pneu est considéré comme usé."),
+Q("meca","À quel moment vérifier la pression des pneus ?",["À froid, au moins une fois par mois","Après 100 km de route","Une fois par an","Seulement avant les vacances"],[0],"Après avoir roulé, la pression est plus élevée."),
+Q("meca","Pour une voiture particulière, la périodicité du contrôle technique est…",["Avant 4 ans, puis tous les 2 ans","Tous les ans","Tous les 3 ans","Jamais si l’entretien est régulier"],[0],"Le premier contrôle a lieu au plus tard 4 ans après la mise en circulation."),
+Q("meca","Le témoin rouge de pression d’huile s’allume en roulant. Que faites-vous ?",["Je m’arrête en sécurité et je coupe le moteur","Je continue jusqu’à la prochaine station","Je l’ignore","J’accélère"],[0],"Le moteur risque une casse rapide."),
+Q("meca","Quel est le rôle de l’ABS ?",["Éviter le blocage des roues et conserver la maîtrise de la direction au freinage","Raccourcir toujours la distance de freinage","Éviter l’aquaplanage","Augmenter l’adhérence des pneus"],[0],"L’ABS aide à garder la direction, mais ne fait pas de miracle."),
+Q("meca","Votre voiture a l’ABS. En freinage d’urgence, que faites-vous ?",["J’appuie fermement et je maintiens la pression, même si la pédale vibre","Je pompe sur la pédale","Je relâche quand ça vibre","J’utilise le frein à main"],[0],"Les vibrations sont normales : c’est l’ABS qui travaille."),
+Q("meca","En cas d’aquaplanage, que faites-vous ?",["Je lève le pied sans freiner brutalement et je tiens le volant","Je freine à fond","Je donne un coup de volant","J’accélère"],[0],"Quand les pneus retrouvent l’adhérence, vous reprenez la maîtrise."),
+Q("meca","Des amortisseurs usés entraînent…",["Une distance de freinage plus longue","Une meilleure adhérence","Une moins bonne tenue de route","Aucun effet sur la sécurité"],[0,2],"Les roues restent moins bien en contact avec la route."),
+Q("meca","Charger un véhicule au-delà de son PTAC provoque…",["Une distance de freinage plus longue","Une meilleure stabilité","Un risque de surchauffe des freins","Aucun effet"],[0,2],"Le PTAC est le poids total autorisé en charge."),
+/* Accidents */
+Q("accid","Face à un accident, quel est l’ordre des gestes ?",["Protéger, alerter, secourir","Alerter, secourir, protéger","Secourir, protéger, alerter","Protéger, secourir, alerter"],[0],"On sécurise d’abord les lieux, puis on prévient les secours."),
+Q("accid","Quels numéros permettent d’alerter les secours ?",["18 (pompiers)","15 (SAMU)","112 (urgences européen)","115 (hébergement d’urgence)"],[0,1,2],"Le 112 fonctionne dans toute l’Union européenne."),
+Q("accid","Que dire aux secours lors de l’appel ?",["Le lieu précis de l’accident","Le nombre de victimes et leur état","Le modèle des véhicules","Le nom de mon assureur"],[0,1],"Restez joignable et suivez les consignes."),
+Q("accid","Où placer le triangle de présignalisation en cas de panne hors autoroute ?",["À au moins 30 m en arrière du véhicule, bien visible","Juste derrière le véhicule","Devant le véhicule","Sur le toit"],[0],"Il avertit les autres conducteurs suffisamment tôt."),
+Q("accid","En panne sur autoroute, que faites-vous ?",["J’allume les feux de détresse","Je mets mon gilet et je fais sortir les passagers derrière la glissière","Je reste dans la voiture sur la bande d’arrêt d’urgence","Je pose le triangle à 10 m derrière le véhicule"],[0,1],"La priorité est de mettre tout le monde à l’abri."),
+Q("accid","En cas d’arrêt d’urgence sur la route, le gilet de haute visibilité doit être…",["Enfilé avant de descendre du véhicule","Enfilé après avoir posé le triangle","Rangé dans le coffre","Facultatif"],[0],"Il doit être à portée de main, dans l’habitacle."),
+Q("accid","Une victime est inconsciente mais respire. Que faites-vous ?",["Je la mets en position latérale de sécurité","Je la laisse sur le dos","Je la fais boire","Je la relève"],[0],"La PLS libère les voies aériennes."),
+Q("accid","Un motard blessé porte un casque. Faut-il l’enlever ?",["Oui, toujours immédiatement","Non, sauf nécessité absolue (victime qui ne respire plus)","Oui, pour lui donner à boire","Seulement s’il se plaint"],[1],"Sans nécessité, on laisse le casque pour éviter d’aggraver une blessure."),
+Q("accid","Une victime est consciente après un accident. Vous devez…",["La rassurer et lui parler","Lui donner à boire","La déplacer systématiquement","La laisser seule"],[0],"Ne la déplacez pas, sauf danger immédiat."),
+Q("accid","Accident sans blessé : le constat amiable…",["Doit être signé par les deux conducteurs","N’est utile que pour les accidents avec blessés","Doit être transmis à l’assureur sous 5 jours ouvrés","Se remplit en cas de désaccord seulement"],[0,2],"Chaque conducteur garde un exemplaire."),
+/* Permis, assurance */
+Q("env","Quelles pratiques permettent de réduire la consommation de carburant ?",["Anticiper et conduire en souplesse","Rester sur un rapport bas à haut régime","Accélérer brusquement","Couper le moteur lors d’un arrêt prolongé"],[0,3],"L’éco-conduite réduit la consommation et la pollution."),
+Q("env","À quoi servent les vignettes Crit’Air ?",["À classer les véhicules selon leurs émissions polluantes","À stationner gratuitement","À prouver l’assurance","À régler la TVA"],[0],"Elles servent notamment à circuler dans les zones à faibles émissions."),
+Q("env","Combien de points compte un permis non probatoire ?",["12","6","10","20"],[0],"Le permis compte 12 points."),
+Q("env","Un conducteur en permis probatoire démarre avec combien de points ?",["6","12","8","3"],[0],"Le capital augmente progressivement pendant la période probatoire."),
+Q("env","Quelle est la durée normale de la période probatoire ?",["3 ans","1 an","5 ans","6 mois"],[0],"Elle est de 2 ans après une conduite accompagnée."),
+Q("env","Quels documents devez-vous pouvoir présenter lors d’un contrôle ?",["Le permis de conduire","Le certificat d’immatriculation (carte grise)","Le carnet d’entretien","La facture d’achat"],[0,1],"Ils servent à vérifier que vous et le véhicule êtes en règle."),
+Q("env","Quelle assurance est obligatoire pour circuler ?",["La responsabilité civile (au tiers)","Tous risques","Vol et incendie","Aucune si le véhicule est ancien"],[0],"Elle couvre les dommages causés aux autres."),
+Q("env","Vous déménagez. Dans quel délai mettre à jour l’adresse de la carte grise ?",["1 mois","1 semaine","1 an","Ce n’est pas nécessaire"],[0],"Le changement d’adresse se fait en ligne."),
+Q("env","Un conducteur qui n’a commis aucune infraction pendant 3 ans retrouve…",["La totalité de ses points","La moitié de ses points","Aucun point","Un seul point"],[0],"Sous réserve de n’avoir eu aucune infraction ayant retiré des points."),
+Q("env","En agglomération, l’avertisseur sonore peut être utilisé…",["Uniquement en cas de danger immédiat","Pour saluer","Pour presser le véhicule devant","À tout moment"],[0],"Hors agglomération, il peut aussi signaler son approche.")
+);
+const cnt={};QS.forEach(q=>{cnt[q.t]=(cnt[q.t]||0)+1;q.id=q.t+cnt[q.t];});
+const TN=Object.fromEntries(THEMES);
+const LEVELS=[[0,"Élève"],[40,"Conduite accompagnée"],[120,"Permis probatoire"],[250,"Conducteur confirmé"],[500,"Moniteur"]];
+const $=s=>document.querySelector(s);
+const el=(t,c)=>{const e=document.createElement(t);if(c)e.className=c;return e;};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const KEY="codeEnPoche.v1";let mem=null,D=null,S=null,tmr=null,deadline=0;
+function load(){let d=null;try{const r=localStorage.getItem(KEY);if(r)d=JSON.parse(r);}catch(e){}
+ d=d||mem||{};return{wrong:d.wrong||[],themes:d.themes||{},exams:d.exams||[],correct:d.correct||0};}
+function save(d){mem=d;D=d;try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
+function level(n){let i=0;LEVELS.forEach((l,k)=>{if(n>=l[0])i=k;});const c=LEVELS[i],x=LEVELS[i+1];
+ return{name:c[1],next:x?x[0]:null,pct:x?Math.round((n-c[0])/(x[0]-c[0])*100):100};}
+function show(v){["home","quiz","result"].forEach(s=>{$("#"+s).hidden=s!==v;});window.scrollTo(0,0);}
+function stopTimer(){if(tmr){clearInterval(tmr);tmr=null;}}
+
+function renderHome(){
+ D=load();const lv=level(D.correct);
+ $("#chipLevel").textContent=lv.name;$("#lvName").textContent=lv.name;
+ $("#lvInfo").textContent=D.correct+" bonnes réponses"+(lv.next?" · prochain niveau à "+lv.next:" · niveau maximum");
+ $("#lvFill").style.width=lv.pct+"%";
+ const g=$("#themes");g.innerHTML="";
+ THEMES.forEach(([id,name])=>{
+  const n=cnt[id],st=D.themes[id],b=el("button","theme");b.type="button";
+  const p=st&&st[0]?Math.round(st[1]/st[0]*100):null;
+  const a=el("span","n");a.textContent=name;
+  const m=el("span","m");const m1=el("span");m1.textContent=n+" questions";
+  const m2=el("span");
+  if(p===null)m2.textContent="Pas encore joué";
+  else if(st[0]>=3&&p<70){m2.className="tag";m2.textContent="À travailler · "+p+" %";}
+  else m2.textContent=p+" % réussis";
+  m.append(m1,m2);
+  const tr=el("span","track"),f=el("span","fill");f.style.display="block";f.style.width=(p||0)+"%";tr.append(f);
+  b.append(a,m,tr);b.addEventListener("click",()=>start("theme",id));g.append(b);
+ });
+ const w=D.wrong.length;
+ $("#errCount").textContent=w+(w>1?" questions à revoir":" question à revoir");
+ $("#errSub").textContent=w?"Rejoue celles que tu as ratées jusqu’à les réussir.":"Aucune erreur en attente.";
+ $("#btnErr").disabled=!w;
+ const h=$("#hist");h.innerHTML="";
+ if(!D.exams.length){const li=el("li");li.innerHTML='<p class="empty">Aucun examen passé pour le moment.</p>';h.append(li);}
+ D.exams.slice(-5).reverse().forEach(x=>{
+  const ok=x.score>=35,li=el("li");
+  const d=el("span","d");d.textContent=new Date(x.ts).toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
+  const s=el("span","s");s.textContent=x.score+"/"+x.n;
+  const p=el("span","pill "+(ok?"ok":"ko"));p.textContent=ok?"Admis":"Ajourné";
+  li.append(d,s,p);h.append(li);
+ });
+ show("home");
+}
+
+function start(mode,theme){
+ D=load();let pool;
+ if(mode==="exam")pool=shuffle(QS.slice()).slice(0,40);
+ else if(mode==="theme")pool=shuffle(QS.filter(q=>q.t===theme)).slice(0,10);
+ else{const w=new Set(D.wrong);pool=shuffle(QS.filter(q=>w.has(q.id))).slice(0,20);}
+ if(!pool.length)return;
+ S={mode,theme,i:0,filter:"bad",items:pool.map(q=>({q,opts:shuffle(q.o.map((t,i)=>({t,ok:q.a.includes(i)}))),sel:new Set(),done:false,good:false}))};
+ show("quiz");renderQ();
+}
+function renderQ(){
+ const it=S.items[S.i],q=it.q,N=S.items.length,ex=S.mode==="exam";
+ $("#qMode").textContent=ex?"Examen blanc":S.mode==="errors"?"Mes erreurs":TN[S.theme];
+ $("#qNum").innerHTML="Question <b>"+(S.i+1)+"</b> / "+N;
+ $("#quitAsk").hidden=true;
+ const sg=$("#segs");sg.innerHTML="";
+ S.items.forEach((x,k)=>{const s=el("span","seg");
+  if(k===S.i)s.classList.add("cur");
+  else if(x.done)s.classList.add(ex?"done":x.good?"good":"bad");sg.append(s);});
+ const sb=$("#signBox");if(q.s){sb.innerHTML=SIGNS[q.s];sb.hidden=false;}else{sb.hidden=true;sb.innerHTML="";}
+ $("#qText").textContent=q.q;
+ const ul=$("#opts");ul.innerHTML="";
+ it.opts.forEach((o,i)=>{const li=el("li"),b=el("button","opt");b.type="button";b.setAttribute("aria-pressed","false");
+  const l=el("span","l");l.textContent="ABCD"[i];const t=el("span","t");t.textContent=o.t;
+  b.append(l,t);b.addEventListener("click",()=>toggle(i));li.append(b);ul.append(li);});
+ $("#fb").hidden=true;$("#btnNext").hidden=true;$("#btnVal").hidden=false;$("#btnVal").disabled=true;
+ $("#timer").hidden=!ex;
+ if(ex){deadline=Date.now()+30000;stopTimer();tick();tmr=setInterval(tick,100);}
+}
+function tick(){const left=Math.max(0,deadline-Date.now());
+ $("#tSec").textContent=Math.ceil(left/1000);$("#tBar").style.transform="scaleX("+(left/30000)+")";
+ $("#timer").classList.toggle("low",left<=8000);
+ if(left<=0){stopTimer();validate();}}
+function toggle(i){const it=S.items[S.i];if(it.done)return;
+ it.sel.has(i)?it.sel.delete(i):it.sel.add(i);
+ [...$("#opts").children].forEach((li,k)=>{const b=li.firstChild,on=it.sel.has(k);b.classList.toggle("sel",on);b.setAttribute("aria-pressed",on);});
+ $("#btnVal").disabled=!it.sel.size;}
+function validate(){
+ const it=S.items[S.i];if(it.done)return;it.done=true;stopTimer();
+ it.good=it.opts.every((o,i)=>o.ok===it.sel.has(i));
+ const d=load(),q=it.q,t=d.themes[q.t]||[0,0];t[0]++;if(it.good)t[1]++;d.themes[q.t]=t;
+ if(it.good){d.correct++;d.wrong=d.wrong.filter(x=>x!==q.id);}else if(!d.wrong.includes(q.id))d.wrong.push(q.id);
+ save(d);
+ if(S.mode==="exam"){next();return;}
+ [...$("#opts").children].forEach((li,k)=>{const b=li.firstChild,o=it.opts[k],s=it.sel.has(k);b.disabled=true;b.classList.remove("sel");
+  const l=b.querySelector(".l");
+  if(o.ok){b.classList.add(s?"ok":"miss");l.textContent="✓";if(!s){const em=el("em");em.textContent="Il fallait cocher";b.querySelector(".t").append(em);}}else if(s){b.classList.add("ko");l.textContent="✕";}});
+ const fb=$("#fb");fb.className="fb "+(it.good?"ok":"ko");fb.innerHTML="";
+ const wrongSel=it.opts.some((o,k)=>!o.ok&&it.sel.has(k));
+ const h=el("h3");h.textContent=it.good?"Bonne réponse":wrongSel?"Mauvaise réponse":"Réponse incomplète";
+ const p=el("p");p.textContent=(!it.good&&!wrongSel?"Ce que tu as coché est juste, mais il manquait une bonne réponse (en pointillés). ":"")+it.q.e;fb.append(h,p);fb.hidden=false;
+ $("#btnVal").hidden=true;const nb=$("#btnNext");nb.hidden=false;
+ nb.textContent=S.i===S.items.length-1?"Voir le résultat":"Question suivante";nb.focus({preventScroll:true});
+}
+function next(){S.i++;if(S.i>=S.items.length)finish();else renderQ();}
+
+function finish(){
+ stopTimer();const N=S.items.length,sc=S.items.filter(x=>x.good).length,ex=S.mode==="exam";
+ const v=$("#verdict");v.innerHTML="";
+ const sd=el("div","score");sd.innerHTML=sc+"<small>/"+N+"</small>";v.append(sd);
+ const vt=el("div","vt"),pp=el("p");
+ if(ex){const pass=N===40&&sc>=35;D=load();D.exams.push({ts:Date.now(),score:sc,n:N});D.exams=D.exams.slice(-30);save(D);
+  vt.className="vt "+(pass?"ok":"ko");vt.textContent=pass?"Admis":"Ajourné";
+  pp.textContent=pass?"Tu atteins le seuil de 35 bonnes réponses.":"Il faut 35 bonnes réponses sur 40. Il t’en manque "+(35-sc)+".";}
+ else{const r=sc/N;vt.textContent=r>=.9?"Excellent":r>=.7?"Bien joué":"À retravailler";
+  pp.textContent=r>=.7?"Tu maîtrises bien ce thème.":"Relis les corrections ci-dessous, puis rejoue.";}
+ v.append(vt,pp);
+ const bd=$("#breakdown");bd.innerHTML="";
+ if(ex){const by={};S.items.forEach(x=>{const b=by[x.q.t]||(by[x.q.t]=[0,0]);b[1]++;if(x.good)b[0]++;});
+  const h=el("h2","eyebrow");h.textContent="Par thème";const br=el("div","br card");
+  THEMES.filter(([id])=>by[id]).forEach(([id,n])=>{const b=el("div","b"),a=el("span"),c=el("span");a.textContent=n;c.textContent=by[id][0]+"/"+by[id][1];
+   const tr=el("div","track"),f=el("div","fill");f.style.width=(by[id][0]/by[id][1]*100)+"%";tr.append(f);b.append(a,c,tr);br.append(b);});
+  bd.append(h,br);}
+ S.filter=S.items.some(x=>!x.good)?"bad":"all";renderCorr();show("result");
+}
+function renderCorr(){
+ const bad=S.items.filter(x=>!x.good).length;
+ $("#tabBad").textContent="Mes erreurs ("+bad+")";$("#tabAll").textContent="Tout voir ("+S.items.length+")";
+ $("#tabBad").setAttribute("aria-pressed",S.filter==="bad");$("#tabAll").setAttribute("aria-pressed",S.filter==="all");
+ const c=$("#corr");c.innerHTML="";
+ const list=S.items.map((x,i)=>[x,i]).filter(([x])=>S.filter==="all"||!x.good);
+ if(!list.length){const p=el("p","empty");p.textContent="Aucune erreur. Beau parcours.";c.append(p);return;}
+ list.forEach(([x,i])=>{
+  const a=el("article","ci "+(x.good?"good":"bad")),h=el("div","h");
+  const n=el("b");n.textContent=i+1;const st=el("span");st.textContent=x.good?"Juste":!x.sel.size?"Sans réponse":x.opts.some((o,k)=>!o.ok&&x.sel.has(k))?"Faux":"Incomplet";
+  const th=el("span");th.textContent="· "+TN[x.q.t];h.append(n,st,th);a.append(h);
+  if(x.q.s){const d=el("div");d.innerHTML=SIGNS[x.q.s];a.append(d);}
+  const q=el("p","cq");q.textContent=x.q.q;a.append(q);
+  const ul=el("ul");
+  x.opts.forEach((o,k)=>{const s=x.sel.has(k),li=el("li",o.ok?(s?"ok":"miss"):(s?"ko":""));
+   const mk=el("span","mk");mk.textContent=o.ok?"✓":s?"✕":"·";const tx=el("span");tx.textContent=o.t;
+   const em=el("em");em.textContent=o.ok?(s?"Juste":"Bonne réponse oubliée"):(s?"Ta réponse":"");tx.append(em);
+   li.append(mk,tx);ul.append(li);});
+  const ex=el("p","ex");ex.textContent=x.q.e;a.append(ul,ex);c.append(a);
+ });
+}
+
+$("#btnExam").addEventListener("click",()=>start("exam"));
+$("#btnErr").addEventListener("click",()=>start("errors"));
+$("#btnVal").addEventListener("click",validate);
+$("#btnNext").addEventListener("click",next);
+$("#btnAgain").addEventListener("click",()=>start(S.mode,S.theme));
+$("#btnHome").addEventListener("click",renderHome);
+$("#tabBad").addEventListener("click",()=>{S.filter="bad";renderCorr();});
+$("#tabAll").addEventListener("click",()=>{S.filter="all";renderCorr();});
+let pend="home";
+function go(k){stopTimer();if(k==="restart")start(S.mode,S.theme);else renderHome();}
+function leave(k){
+ if(S&&S.mode==="exam"&&!S.items.every(x=>x.done)){pend=k;
+  $("#quitMsg").textContent=k==="restart"?"Recommencer fera perdre ta progression dans cet examen.":"Abandonner l’examen en cours ?";
+  $("#quitAsk").hidden=false;window.scrollTo(0,0);}
+ else go(k);}
+$("#btnQuit").addEventListener("click",()=>leave("home"));
+$("#btnAbandon").addEventListener("click",()=>leave("home"));
+$("#btnRestart").addEventListener("click",()=>leave("restart"));
+$("#quitYes").addEventListener("click",()=>go(pend));
+$("#quitNo").addEventListener("click",()=>{$("#quitAsk").hidden=true;});
+let rs=false;
+$("#reset").addEventListener("click",function(){
+ if(!rs){rs=true;this.textContent="Confirmer : tout effacer";return;}
+ rs=false;this.textContent="Réinitialiser ma progression";save({wrong:[],themes:{},exams:[],correct:0});renderHome();});
+document.addEventListener("keydown",e=>{
+ if($("#quiz").hidden||!S)return;const it=S.items[S.i];if(!it||it.done&&S.mode==="exam")return;
+ const k=e.key.toLowerCase(),i="1234".indexOf(k)>=0?"1234".indexOf(k):"abcd".indexOf(k);
+ if(k.length===1&&i>=0&&i<it.opts.length){toggle(i);if(document.activeElement)document.activeElement.blur();}
+ else if(k==="enter"&&document.activeElement===document.body){if(!it.done&&it.sel.size)validate();else if(it.done)next();}
+});
+renderHome();
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+</script>
+</body>
+</html>
